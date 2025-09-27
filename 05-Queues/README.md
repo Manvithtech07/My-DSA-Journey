@@ -4,9 +4,9 @@ This section covers the C implementation of a Queue, a fundamental linear data s
 
 ---
 
-## 🤔 What is a Queue?
+##  What is a Queue?
 
-A queue is a linear collection of elements where insertions happen at one end, called the **rear**, and deletions happen at the other end, called the **front**. This behavior mimics a real-world queue, like a line at a checkout counter. The first person to get in line is the first person to be served.
+A queue is a linear collection of elements where insertions happen at one end, called the **rear**, and deletions happen at the other end, called the **front**.
 
 **Key characteristics:**
 * **FIFO Principle:** The first element added to the queue is the first one to be removed.
@@ -16,7 +16,7 @@ A queue is a linear collection of elements where insertions happen at one end, c
 
 ---
 
-## ⚙️ Core Operations
+##  Core Operations
 
 * **`enqueue(data)`:** Adds an element to the **rear** of the queue.
 * **`dequeue()`:** Removes and returns the element from the **front** of the queue.
@@ -27,7 +27,7 @@ A queue is a linear collection of elements where insertions happen at one end, c
 
 ---
 
-## 📈 Complexity Analysis
+##  Complexity Analysis
 
 Queues offer very efficient primary operations, making them ideal for managing tasks in order.
 
@@ -40,7 +40,7 @@ Queues offer very efficient primary operations, making them ideal for managing t
 
 ---
 
-## 💻 C Implementation Details (Circular Array-based)
+##  C Implementation Details (Circular Array-based)
 
 A queue is often implemented using a circular array to make `enqueue` and `dequeue` operations efficient `O(1)` time. Pointers for `front` and `rear` wrap around to the beginning of the array as needed.
 
@@ -58,7 +58,7 @@ typedef struct _queue_ {
 
 ---
 
-## 🚀 Function Prototypes
+##  Function Prototypes
 
 Here are the essential function prototypes for a circular queue implementation.
 
