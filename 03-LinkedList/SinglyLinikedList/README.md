@@ -1,4 +1,4 @@
-# Operations on linked list are performed like: 
+# Operations on linked list:
 Basic Operations
 
     slist_new(): Creates and returns a new, empty list.
