@@ -4,7 +4,7 @@ This section covers the C implementation of a Stack, a fundamental linear data s
 
 ---
 
-## 🤔 What is a Stack?
+##  What is a Stack?
 
 A stack is an abstract data type that serves as a collection of elements. The name "stack" comes from the analogy of a stack of physical items, like a pile of books or a stack of plates. You can only add a new item to the **top** of the stack, and you can only remove an item from the **top**.
 
@@ -12,11 +12,9 @@ A stack is an abstract data type that serves as a collection of elements. The na
 * **LIFO Principle:** The last element added to the stack is the first one to be removed.
 * **Restricted Access:** Elements can only be added (pushed) and removed (popped) from the top.
 
-[Image of a stack of plates]
-
 ---
 
-## ⚙️ Core Operations
+##  Core Operations
 
 * **`push(data)`:** Adds an element to the top of the stack.
 * **`pop()`:** Removes and returns the element from the top of the stack.
@@ -26,7 +24,7 @@ A stack is an abstract data type that serves as a collection of elements. The na
 
 ---
 
-## 📈 Complexity Analysis
+##  Complexity Analysis
 
 For both array-based and linked-list-based implementations, the core operations are highly efficient.
 
@@ -39,7 +37,7 @@ For both array-based and linked-list-based implementations, the core operations 
 
 ---
 
-## 💻 C Implementation Details (Array-based)
+##  C Implementation Details (Array-based)
 
 A stack can be easily implemented using an array and a variable `top` that keeps track of the index of the last inserted element.
 
@@ -55,7 +53,7 @@ typedef struct _stack_ {
 
 ---
 
-## 🚀 Function Prototypes
+##  Function Prototypes
 
 Here is a set of function prototypes for a typical array-based stack implementation.
 
