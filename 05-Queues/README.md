@@ -4,8 +4,6 @@ This section covers the C implementation of a Queue, a fundamental linear data s
 
 ---
 
-##  What is a Queue?
-
 A queue is a linear collection of elements where insertions happen at one end, called the **rear**, and deletions happen at the other end, called the **front**.
 
 **Key characteristics:**
@@ -64,10 +62,10 @@ Here are the essential function prototypes for a circular queue implementation.
 
 ```c
 // Creates and returns a new queue with a given capacity.
-Queue* create_queue(uint32_t capacity);
+Queue* queue_new(uint32_t capacity);
 
 // Frees all memory associated with the queue.
-void destroy_queue(Queue* queue);
+void free_queue(Queue* queue);
 
 // Checks if the queue is full.
 int32_t is_full(Queue* queue);
