@@ -5,7 +5,7 @@
 A **Data Structure** is a systematic way of organizing, storing, and managing data in a computer's memory so that it can be accessed and manipulated efficiently. The choice of data structure determines how data is stored and the operations that can be performed on it.
 
 * **Examples:** Arrays, Linked Lists, Stacks, Queues, Trees, Graphs.
-
+ 
 ## What is an Algorithm?
 
 An **Algorithm** is a finite, well-defined sequence of steps or instructions designed to solve a specific problem or perform a computation. It takes a set of inputs and produces a desired output.
