@@ -4,7 +4,6 @@ This section covers the C implementation of a Stack, a fundamental linear data s
 
 ---
 
-##  What is a Stack?
 
 A stack is an abstract data type that serves as a collection of elements. You can only add a new item to the **top** of the stack, and you can only remove an item from the **top**.
 
@@ -59,10 +58,10 @@ Here is a set of function prototypes for a typical array-based stack implementat
 
 ```c
 // Creates and returns a new stack with a given capacity.
-Stack* create_stack(uint32_t capacity);
+Stack* stk_new(uint32_t capacity);
 
 // Frees all memory associated with the stack.
-void destroy_stack(Stack* stack);
+void free_stk(Stack* stk);
 
 // Checks if the stack is full. Returns 1 if full, 0 otherwise.
 int32_t is_full(Stack* stack);
