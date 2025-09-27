@@ -6,7 +6,7 @@ This section covers the C implementation of a Stack, a fundamental linear data s
 
 ##  What is a Stack?
 
-A stack is an abstract data type that serves as a collection of elements. The name "stack" comes from the analogy of a stack of physical items, like a pile of books or a stack of plates. You can only add a new item to the **top** of the stack, and you can only remove an item from the **top**.
+A stack is an abstract data type that serves as a collection of elements. You can only add a new item to the **top** of the stack, and you can only remove an item from the **top**.
 
 **Key characteristics:**
 * **LIFO Principle:** The last element added to the stack is the first one to be removed.
