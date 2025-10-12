@@ -1,7 +1,7 @@
 //Merge 2 sprted arrays and the new array should also be sorted
 #include<stdio.h>
 void mergearrays(int arr1[],int arr2[],int size1, int size2){
-    int merged[100];int i=0,j=0,k=0;
+    int merged[size1+size2];int i=0,j=0,k=0;
     while(i<size1 && j<size2){
         if(arr1[i]<arr2[j]){
             merged[k++]=arr1[i++];
@@ -23,3 +23,4 @@ int main(){
     mergearrays(arr1,arr2,size1,size2);
     return 0;
 }
+
