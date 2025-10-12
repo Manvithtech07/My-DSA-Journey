@@ -16,9 +16,10 @@ void TwoSum(int arr[],int size,int target){
     }
 }
 int main(){
-    int arr[]={2,6,11,15};
+    int arr[]={2,7,11,15};
     int size = sizeof(arr)/sizeof(arr[0]);
     int target = 9;
     TwoSum(arr,size,target);
     return 0;
 }
+
