@@ -24,9 +24,7 @@ int main(){
 	return 0;
 }
 
-/*2.*
-Let the parent fork and let the child execute ls command. Observe the result with and without
-having wait() system call in the parent.*/
+/*2.*Let the parent fork and let the child execute ls command. Observe the result with and without having wait() system call in the parent.*/
 #include<stdio.h>
 #include<stdlib.h>//for exit()
 #include<unistd.h>//for fork() execlp()
@@ -51,8 +49,7 @@ int main(){
 	return 0;
 }
 
-/*3.*
-Let the parent create 4 children. Make them execute ls, ls –l, pwd and date commands. (One child executes one command.)*/
+/*3.* Let the parent create 4 children. Make them execute ls, ls –l, pwd and date commands. (One child executes one command.)*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
@@ -98,8 +95,7 @@ int main(){
 	return 0;
 }
 
-/*4.*
-Create a child through fork(). Let the child generate the fibonacci series (1, 1, 2, 3, 5, 8…) upto n numbers. The value of n has to passed as a command line argument.*/
+/*4.*Create a child through fork(). Let the child generate the fibonacci series (1, 1, 2, 3, 5, 8…) upto n numbers. The value of n has to passed as a command line argument.*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
@@ -216,66 +212,6 @@ int main(){
 	return 0;
 }
 
-/*QUESTION 7 7.
-Let the parent create 2 children which work on a common sample file. Let one child count the
-total number of lines in the file while the other counts the total number of characters in the same file.
-Provide the filename as a command line argument.
-#include<stdio.h>*/
-#include<stdlib.h>
-#include<unistd.h>
-int main(int argc, char const *argv[])
-{
-	if(argc != 2){
-		fprintf(stderr, "Error, \n");
-		return 1;
-	}
-	int n = atoi(argv[1]);
-	printf("CHILD PID %d. Even Series:\n",getpid());
-	for(int i=0;i<n;i++){
-		printf("%d ",2*i);
-	}
-	printf("\n");
-	return 0;
-}
-#include <stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<sys/types.h>
-#include<sys/wait.h>
-int main(int argc, char const *argv[])
-{
-	if(argc != 2){
-		fprintf(stderr, "Error,%s \n", argv[0]);
-		return 1;
-	}
-	int n_for_parent = atoi(argv[1]);
-	if(n_for_parent<=0){
-		fprintf(stderr, "Enter a positive number\n");
-		return 1;
-	}
-	pid_t pid = fork();
-	if(pid<0){
-		fprintf(stderr, "Fork failed\n");
-		return 1;
-	}
-	else if(pid ==0){
-		printf("CHILD: PID %d. I will be replaced by even_generator.c\n",getpid());
-		execlp("./even_generator","./even_generator",argv[1],NULL);
-		perror("execlp failed");
-		exit(1);
-	}
-	else{
-		printf("PARENT (PID: %d): Printing odd series up to %d:\n", getpid(), n_for_parent);
-        for (int i = 0; i < n_for_parent; i++) {
-            printf("%d ", (2 * i) + 1); // 1, 3, 5, 7...
-        }
-        printf("\nPARENT: Done.\n");
-        wait(NULL); 
-        printf("PARENT: Child has finished. Parent is now exiting.\n");
-    }
-
-    return 0;
-}
 
 /*7.*Let the parent create 2 children which work on a common sample file. Let one child count the total number of lines in the file while the other counts the total number of characters in the same file. Provide the filename as a command line argument.*/
 #include<stdio.h>
@@ -322,7 +258,7 @@ int main(int argc, char const *argv[])
 
 
 
-///question 8 Let the parent create 2 children which work on a common sample file. Let one child convert all lowercase to uppercase in the file while the other counts the total number of character ‘a’ s in the same file. Provide the filename as a command line argument.
+//question 8 Let the parent create 2 children which work on a common sample file. Let one child convert all lowercase to uppercase in the file while the other counts the total number of character ‘a’ s in the same file. Provide the filename as a command line argument.
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -339,8 +275,6 @@ int main(int argc, char *argv[]) {
     char *filename = argv[1];
 
     pid_t pid1, pid2;
-
-    // --- Create Child 1 (Count 'a's) ---
     pid1 = fork();
     if (pid1 < 0) {
         perror("Fork 1 failed");
@@ -348,7 +282,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (pid1 == 0) {
-        // --- CHILD 1: 'a' Counter (Read-Only) ---
         FILE *file = fopen(filename, "r");
         if (file == NULL) {
             perror("fopen read");
@@ -367,7 +300,6 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    // --- Create Child 2 (To Uppercase) ---
     pid2 = fork();
     if (pid2 < 0) {
         perror("Fork 2 failed");
@@ -375,9 +307,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (pid2 == 0) {
-        // --- CHILD 2: Uppercase (Read & Write) ---
-        
-        // 1. Read the whole file into a buffer (up to 4096 chars)
         char buffer[4096];
         FILE *file_read = fopen(filename, "r");
         if (file_read == NULL) {
@@ -385,15 +314,13 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         size_t bytes_read = fread(buffer, 1, 4095, file_read);
-        buffer[bytes_read] = '\0'; // Null-terminate the string
+        buffer[bytes_read] = '\0'; 
         fclose(file_read);
 
-        // 2. Modify the buffer
         for (int i = 0; i < bytes_read; i++) {
             buffer[i] = toupper(buffer[i]);
         }
         
-        // 3. Write the buffer back, overwriting the file
         FILE *file_write = fopen(filename, "w");
         if (file_write == NULL) {
             perror("fopen write");
@@ -406,8 +333,7 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    // --- PARENT PROCESS ---
-    // Wait for both children to finish
+
     wait(NULL);
     wait(NULL);
     
@@ -424,7 +350,7 @@ int main(int argc, char *argv[]) {
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <ctype.h>    // For islower(), isupper(), toupper(), tolower()
+#include <ctype.h>    // for islower(), isupper(), toupper(), tolower()
 
 int main(int argc, char *argv[]) {
     
@@ -435,8 +361,6 @@ int main(int argc, char *argv[]) {
     char *filename = argv[1];
 
     pid_t pid1, pid2;
-
-    // --- Create Child 1 (Word Count using 'wc -w') ---
     pid1 = fork();
     if (pid1 < 0) {
         perror("Fork 1 failed");
@@ -444,14 +368,12 @@ int main(int argc, char *argv[]) {
     }
 
     if (pid1 == 0) {
-        // --- CHILD 1: Word Counter ---
         printf("CHILD 1 (Counter): Counting words...\n");
         execlp("wc", "wc", "-w", filename, NULL);
         perror("execlp wc failed"); // Only runs if exec fails
         exit(1);
     }
 
-    // --- Create Child 2 (Invert Case) ---
     pid2 = fork();
     if (pid2 < 0) {
         perror("Fork 2 failed");
@@ -459,10 +381,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (pid2 == 0) {
-        // --- CHILD 2: Case Inverter (Read & Write) ---
-        // This logic is just like Q8
-        
-        // 1. Read file into a buffer
         char buffer[4096];
         FILE *file_read = fopen(filename, "r");
         if (file_read == NULL) {
@@ -473,7 +391,6 @@ int main(int argc, char *argv[]) {
         buffer[bytes_read] = '\0';
         fclose(file_read);
 
-        // 2. Modify buffer (invert case)
         for (int i = 0; i < bytes_read; i++) {
             if (islower(buffer[i])) {
                 buffer[i] = toupper(buffer[i]);
@@ -482,7 +399,6 @@ int main(int argc, char *argv[]) {
             }
         }
         
-        // 3. Write buffer back to file
         FILE *file_write = fopen(filename, "w");
         if (file_write == NULL) {
             perror("fopen write");
@@ -494,9 +410,6 @@ int main(int argc, char *argv[]) {
         printf("CHILD 2 (Converter): Inverted file case.\n");
         exit(0);
     }
-
-    // --- PARENT PROCESS ---
-    // Wait for both children to finish
     wait(NULL);
     wait(NULL);
     
@@ -505,13 +418,55 @@ int main(int argc, char *argv[]) {
 }
 
 
+//(extra question)Recursive fork
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include <sys/types.h>
+#include<sys/wait.h>
 
 
-----------------------------------------------------------------------------------Threads--------------------------------------------------------------------------------------------
+void recursive_fork(int n) {
+    if (n <= 0)
+        return;
+
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("Fork failed");
+        exit(1);
+    } 
+    else if (pid == 0) {
+        // Child process
+        printf("Child process created: PID = %d, PPID = %d\n", getpid(), getppid());
+        recursive_fork(n - 1);  // Recursive call in the child
+        exit(0);
+    } 
+    else {
+        // Parent waits for child
+        wait(NULL);
+        printf("Parent process (PID = %d) finished waiting.\n", getpid());
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of recursive forks: ");
+    scanf("%d", &n);
+
+    printf("Main process PID: %d\n", getpid());
+    recursive_fork(n);
+
+    printf("Main process exiting.\n");
+    return 0;
+}
 
 
-/*4. *Create two threads in a main program, let the first thread execute a
-function to display a message namely “this is thread one” , similarly let the second thread displays “this is thread two’.*/
+
+------------------------------------------------------------------------------------------------Threads--------------------------------------------------------------------------------------------
+
+
+/*4. *Create two threads in a main program, let the first thread execute a function to display a message namely “this is thread one” , similarly let the second thread displays “this is thread two’.*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
@@ -708,12 +663,11 @@ writes “three threads have visited this file” at the very end of the file.*/
 
 #define FILENAME "sample.txt"
 
-// Thread function declarations
+//thread function declarations
 void *count_words(void *arg);
 void *convert_to_lowercase(void *arg);
 void *append_message(void *arg);
 
-// Global mutex for file access synchronization
 pthread_mutex_t file_lock;
 
 int main()
@@ -721,15 +675,12 @@ int main()
     pthread_t t1, t2, t3;
     pthread_mutex_init(&file_lock, NULL);
 
-    // Create threads
     pthread_create(&t1, NULL, count_words, NULL);
     pthread_create(&t2, NULL, convert_to_lowercase, NULL);
 
-    // Wait for both threads to finish before creating third one
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
 
-    // Create and run third thread
     pthread_create(&t3, NULL, append_message, NULL);
     pthread_join(t3, NULL);
 
@@ -826,7 +777,7 @@ void *append_message(void *arg)
 
 
 
-// Design a thread program which recurcively creates threads in the thread function. Print the thread number in the function.The number of recursive calls are input from the keyboard 
+//(extra question) Design a thread program which recurcively creates threads in the thread function. Print the thread number in the function.The number of recursive calls are input from the keyboard 
 #include<stdio.h>
 #include<pthread.h>
 void *recursive_thread(void *arg){
@@ -853,49 +804,3 @@ int main(){
 	return 0;
 
 }
-
-
-
-////Recursive fork
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include <sys/types.h>
-#include<sys/wait.h>
-
-
-void recursive_fork(int n) {
-    if (n <= 0)
-        return;
-
-    pid_t pid = fork();
-
-    if (pid < 0) {
-        perror("Fork failed");
-        exit(1);
-    } 
-    else if (pid == 0) {
-        // Child process
-        printf("Child process created: PID = %d, PPID = %d\n", getpid(), getppid());
-        recursive_fork(n - 1);  // Recursive call in the child
-        exit(0);
-    } 
-    else {
-        // Parent waits for child
-        wait(NULL);
-        printf("Parent process (PID = %d) finished waiting.\n", getpid());
-    }
-}
-
-int main() {
-    int n;
-    printf("Enter the number of recursive forks: ");
-    scanf("%d", &n);
-
-    printf("Main process PID: %d\n", getpid());
-    recursive_fork(n);
-
-    printf("Main process exiting.\n");
-    return 0;
-}
-
