@@ -94,3 +94,108 @@ df = pd.DataFrame(all_books)
 df.to_csv('books_data.csv', index=False, encoding='utf-8')
 with open('books_data.json', 'w', encoding='utf-8') as json_file:
     df.to_json(json_file, orient='records', lines=True)
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+import scrapy
+from bookstoscrape.items import BookstoscrapeItem
+
+class BooksSpider(scrapy.Spider):
+    name = "books"
+    allowed_domains = ["books.toscrape.com"]
+    start_urls = ["https://books.toscrape.com"]
+
+    def parse(self, response):
+        books = response.xpath('//article[@class="product_pod"]')
+        for book in books:
+            item = BookstoscrapeItem()
+            relative_link = book.xpath('.//h3/a/@href').get()
+            item['link'] = response.urljoin(relative_link)
+            item['rating'] = book.xpath('.//p[contains(@class, "star-rating")]/@class').extract()
+            item['price'] = book.xpath('.//*[@class="price_color"]/text()').extract()
+            item['title'] = book.xpath('.//h3/a/@title').extract()
+            yield item   
+
+        next_page = response.xpath('//*[@class="next"]/a/@href').get()
+        if next_page:
+            yield response.follow(next_page,callback=self.parse)
+        pass
+
+
+
+
+
+
+
+from itemadapter import ItemAdapter
+import sqlite3
+
+
+class BookstoscrapePipeline:
+    def open_spider(self, spider):
+        # Connect (creates books.db if it doesn't exist)
+        self.conn = sqlite3.connect("books.db")
+        self.cur = self.conn.cursor()
+
+        # Create the 'books' table if it doesn't exist
+        self.cur.execute("""
+            CREATE TABLE IF NOT EXISTS books(
+                title TEXT,
+                price TEXT,
+                rating TEXT,
+                link TEXT
+            )
+        """)
+        self.conn.commit()
+
+    def close_spider(self, spider):
+        # Commit and close DB connection
+        self.conn.commit()
+        self.conn.close()
+
+    def process_item(self, item, spider):
+        adapter = ItemAdapter(item)
+
+        # Extract values safely (convert lists to strings if needed)
+        title = adapter.get('title')
+        price = adapter.get('price')
+        rating = adapter.get('rating')
+        link = adapter.get('link')
+
+        if isinstance(title, list):
+            title = title[0]
+        if isinstance(price, list):
+            price = price[0]
+        if isinstance(rating, list):
+            rating = rating[0]
+
+        # Insert item into the table
+        self.cur.execute("""
+            INSERT INTO books (title, price, rating, link)
+            VALUES (?, ?, ?, ?)
+        """, (title, price, rating, link))
+
+        # Optional: commit once per item (fine for small projects)
+        self.conn.commit()
+
+        return item
+
+
+
+
+
+
+import scrapy
+
+class BookstoscrapeItem(scrapy.Item):
+    # Define the fields for your item
+    link = scrapy.Field()
+    title = scrapy.Field()
+    price = scrapy.Field()
+    rating = scrapy.Field()
+    
