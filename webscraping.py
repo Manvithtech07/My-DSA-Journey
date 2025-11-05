@@ -52,6 +52,7 @@ for page in range(1,5):
 
 
 
+
 #books.toscrape.com
 from bs4 import BeautifulSoup
 import requests
@@ -96,6 +97,61 @@ with open('books_data.json', 'w', encoding='utf-8') as json_file:
     df.to_json(json_file, orient='records', lines=True)
 
 
+
+
+
+
+
+#https://pythonjobs.github.io/
+from bs4 import BeautifulSoup
+import requests
+import csv
+import json
+import pandas as pd
+from fake_useragent import UserAgent
+ua = UserAgent()
+header = {'user-agent':ua.chrome}
+base_url = 'https://pythonjobs.github.io/'
+soup = BeautifulSoup(requests.get(base_url,headers = header).content,'lxml')
+#print(soup)
+jobs = []
+job_cards = soup.find_all('section',class_='job_list')
+for job in job_cards:
+  titles = job.find_all('h1')
+  locations = [span for span in job.find_all("span", class_="info") if span.find("i", class_="i-globe")]
+  dates = [span for span in job.find_all("span",class_="info") if span.find("i",class_="i-calendar")]
+  companies = [span for span in job.find_all("span",class_="info") if span.find("i",class_="i-company")]
+  links = job.find_all('a',class_="go_button")
+  
+  for title,loc,date,company,link in zip(titles,locations,dates,companies,links):
+    print(title.text)
+    print("".join(loc.text).strip())
+    print("".join(date.text).strip())
+    print("".join(company.text).strip())
+    job_link = "https://pythonjobs.github.io/" + link.get('href') if links else "N/A"
+    print(job_link)
+    if job_link != "N/A":
+      job_page = BeautifulSoup(requests.get(job_link, headers=header).content, 'lxml')
+      contact_info_list = []
+      contact_info = job_page.find_all('div',class_='field')
+      for info in contact_info:
+        text = info.get_text(strip=True)
+        contact_info_list.append(text)
+        print(contact_info_list)
+      print("-"*100)
+  
+      jobs_data = {
+          'Title': title.text,
+          'Location': "".join(loc.text).strip(),
+          'Date': "".join(date.text).strip(),
+          'Company': "".join(company.text).strip(),
+          'Link': job_link,
+          'Contact Info': contact_info_list
+        }
+      jobs.append(jobs_data)
+      pd.DataFrame(jobs).to_csv('jobs.csv', index=False, encoding='utf-8')
+      with open('jobs.json', 'w', encoding='utf-8') as json_file:
+        pd.DataFrame(jobs).to_json(json_file, orient='records', lines=True)
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
