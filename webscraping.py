@@ -159,99 +159,149 @@ for job in job_cards:
 
 
 import scrapy
-from bookstoscrape.items import BookstoscrapeItem
 
 class BooksSpider(scrapy.Spider):
     name = "books"
     allowed_domains = ["books.toscrape.com"]
-    start_urls = ["https://books.toscrape.com"]
+    start_urls = ["http://books.toscrape.com/"]
 
     def parse(self, response):
+        # Select all book containers
         books = response.xpath('//article[@class="product_pod"]')
+
         for book in books:
-            item = BookstoscrapeItem()
-            relative_link = book.xpath('.//h3/a/@href').get()
-            item['link'] = response.urljoin(relative_link)
-            item['rating'] = book.xpath('.//p[contains(@class, "star-rating")]/@class').extract()
-            item['price'] = book.xpath('.//*[@class="price_color"]/text()').extract()
-            item['title'] = book.xpath('.//h3/a/@title').extract()
-            yield item   
+            title = book.xpath('.//h3/a/@title').get()
+            price = book.xpath('.//p[@class="price_color"]/text()').get()
+            rating = book.xpath('.//p[contains(@class,"star-rating")]/@class').get().split()[-1]
+            link = book.xpath('.//h3/a/@href').get()
+            full_link = response.urljoin(link)
 
-        next_page = response.xpath('//*[@class="next"]/a/@href').get()
-        if next_page:
-            yield response.follow(next_page,callback=self.parse)
-        pass
-
-
-
-
-
-
-
-from itemadapter import ItemAdapter
-import sqlite3
-
-
-class BookstoscrapePipeline:
-    def open_spider(self, spider):
-        # Connect (creates books.db if it doesn't exist)
-        self.conn = sqlite3.connect("books.db")
-        self.cur = self.conn.cursor()
-
-        # Create the 'books' table if it doesn't exist
-        self.cur.execute("""
-            CREATE TABLE IF NOT EXISTS books(
-                title TEXT,
-                price TEXT,
-                rating TEXT,
-                link TEXT
+            yield scrapy.Request(
+                full_link,
+                callback=self.parse_book_page,
+                meta={'title': title, 'price': price, 'rating': rating, 'link': full_link}
             )
-        """)
-        self.conn.commit()
 
-    def close_spider(self, spider):
-        # Commit and close DB connection
-        self.conn.commit()
-        self.conn.close()
+        # Pagination
+        next_page = response.xpath('//li[@class="next"]/a/@href').get()
+        if next_page:
+            yield response.follow(next_page, callback=self.parse)
+
+    def parse_book_page(self, response):
+        title = response.meta['title']
+        price = response.meta['price']
+        rating = response.meta['rating']
+        link = response.meta['link']
+
+        desc = response.xpath('normalize-space(//div[@id="product_description"]/following-sibling::p/text())').get()
+        availability = response.xpath('normalize-space(//p[contains(@class,"instock")])').get()
+
+        yield {
+            'Title': title,
+            'Price': price,
+            'Rating': rating,
+            'Link': link,
+            'Description': desc if desc else "N/A",
+            'Availability': availability if availability else "N/A"
+        }
+
+
+
+
+
+
+
+import sqlite3
+import csv
+import json
+
+class CSVWriterPipeline:
+    def open_spider(self, spider):
+        self.file = open('books.csv', 'w', newline='', encoding='utf-8')
+        self.writer = None
 
     def process_item(self, item, spider):
-        adapter = ItemAdapter(item)
+        if self.writer is None:
+            self.writer = csv.DictWriter(self.file, fieldnames=item.keys())
+            self.writer.writeheader()
+        self.writer.writerow(item)
+        return item
 
-        # Extract values safely (convert lists to strings if needed)
-        title = adapter.get('title')
-        price = adapter.get('price')
-        rating = adapter.get('rating')
-        link = adapter.get('link')
+    def close_spider(self, spider):
+        self.file.close()
 
-        if isinstance(title, list):
-            title = title[0]
-        if isinstance(price, list):
-            price = price[0]
-        if isinstance(rating, list):
-            rating = rating[0]
 
-        # Insert item into the table
-        self.cur.execute("""
-            INSERT INTO books (title, price, rating, link)
-            VALUES (?, ?, ?, ?)
-        """, (title, price, rating, link))
+import json
 
-        # Optional: commit once per item (fine for small projects)
-        self.conn.commit()
+class JsonWriterPipeline:
+    def open_spider(self, spider):
+        self.file = open('books.json', 'w', encoding='utf-8')
+        self.file.write('[')  # start of list
+        self.first_item = True
 
+    def close_spider(self, spider):
+        self.file.write(']')
+        self.file.close()
+
+    def process_item(self, item, spider):
+        if not self.first_item:
+            self.file.write(',')
+        else:
+            self.first_item = False
+        line = json.dumps(dict(item), ensure_ascii=False)
+        self.file.write('\n' + line)
+        self.file.flush()  # ensures partial data is written
         return item
 
 
+class DatabasePipeline:
+    def open_spider(self, spider):
+        # Connect to SQLite (you can replace with MySQL if needed)
+        self.connection = sqlite3.connect('books.db')
+        self.cursor = self.connection.cursor()
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS books (
+                title TEXT,
+                price TEXT,
+                rating TEXT,
+                link TEXT,
+                description TEXT,
+                availability TEXT
+            )
+        ''')
+        self.connection.commit()
+
+    def process_item(self, item, spider):
+        self.cursor.execute('''
+            INSERT INTO books (title, price, rating, link, description, availability)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            item.get('Title'),
+            item.get('Price'),
+            item.get('Rating'),
+            item.get('Link'),
+            item.get('Description'),
+            item.get('Availability')
+        ))
+        self.connection.commit()
+        return item
+
+    def close_spider(self, spider):
+        self.connection.close()
 
 
 
 
-import scrapy
 
-class BookstoscrapeItem(scrapy.Item):
-    # Define the fields for your item
-    link = scrapy.Field()
-    title = scrapy.Field()
-    price = scrapy.Field()
-    rating = scrapy.Field()
+
+ITEM_PIPELINES = {
+    'bookstoscrape.pipelines.CSVWriterPipeline': 300,
+    'bookstoscrape.pipelines.JsonWriterPipeline': 400,
+    'bookstoscrape.pipelines.DatabasePipeline': 500,
+}
+
+
+
+
+
     
